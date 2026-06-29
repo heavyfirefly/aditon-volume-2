@@ -1381,3 +1381,49 @@ button {
     white-space: normal;
   }
 }
+
+/* 1. Müşteri Notları Bölümünü Genel Olarak Düzenleme */
+.testimonials__grid {
+  display: grid;
+  grid-template-columns: 1fr 1.5fr; /* Sol tarafı biraz daraltıp, sağdaki yorumlara daha geniş alan açıyoruz */
+  gap: var(--site-pad);
+  align-items: flex-start;
+  position: relative;
+}
+
+/* 2. Sağ Taraftaki Kayan Notları Sağa Yaslama ve İç Boşluk Verme */
+.testimonial-slider {
+  position: relative;
+  padding-left: clamp(2rem, 5vw, 5rem); /* Solundaki başlıkla arasına temiz bir güvenlik mesafesi koyduk */
+  margin-left: auto; /* Kutuyu tamamen sağa doğru yaslar */
+  width: 100%;
+  min-height: 24rem; /* İçerideki çizgilerin alta kayması için slider kutusuna yeterli taban yüksekliği verdik */
+}
+
+/* 3. Slider Kontrol Çizgilerini (3 İnce Çizgi) En Alta İndirme */
+.slider-controls {
+  position: absolute;
+  bottom: 0 !important; /* Yazı ne kadar uzun olursa olsun, kesinlikle kutunun en altına sabitler */
+  left: clamp(2rem, 5vw, 5rem) !important; /* Yorum yazısının başlangıç hizasıyla çizgileri senkronize eder */
+  top: auto !important; /* Eğer yukarıdan bir sabitleme varsa iptal eder */
+  margin-top: 2rem;
+  z-index: 5;
+}
+
+/* 4. Mobil ve Küçük Ekranlar İçin Üst Üste Binmeyi Önleyen Tam Koruma */
+@media (max-width: 900px) {
+  .testimonials__grid {
+    grid-template-columns: 1fr; /* Ekran daralınca sol başlığı üste, kayan notları alta alır (asla çakışmazlar) */
+    gap: 3rem;
+  }
+  
+  .testimonial-slider {
+    padding-left: 0;
+    margin-left: 0;
+    min-height: 20rem;
+  }
+  
+  .slider-controls {
+    left: 0 !important;
+  }
+}
