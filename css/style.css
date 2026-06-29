@@ -1323,7 +1323,7 @@ button {
 
 .hero__logo-badge {
   position: absolute;
-  top: calc(1.35rem + 2.8rem + 1.5rem); 
+  top: calc(1.35rem + 2.8rem + 1rem); 
   left: var(--site-pad);      
   
   font-family: var(--font-main);
@@ -1339,6 +1339,6 @@ button {
 
 @media (max-width: 680px) {
   .hero__logo-badge {
-    top: calc(0.95rem + 2.7rem + 1.2rem);
+    top: calc(0.95rem + 2.7rem + 1rem);
   }
 }
