@@ -1427,3 +1427,39 @@ button {
     left: 0 !important;
   }
 }
+
+/* Slider altındaki 3 ince çizgiyi kesin olarak en alta indiren baskın kod */
+.testimonials .slider-controls {
+  position: absolute !important;
+  bottom: -2.5rem !important; /* Slider kutusunun tamamen dışına, en altına taşır */
+  left: clamp(2rem, 5vw, 5rem) !important; /* Yorum yazısının başlangıç hizası */
+  top: auto !important;
+  transform: none !important;
+  margin: 0 !important;
+  display: flex !important;
+  gap: 0.5rem !important;
+  z-index: 99 !important; /* Her şeyin üstünde görünmesi için */
+}
+
+/* Yorum yazılarının bittiği alana çizgiler için ekstra bir alt boşluk bırakıyoruz */
+.testimonial-slider {
+  position: relative !important;
+  padding-left: clamp(2rem, 5vw, 5rem) !important;
+  padding-bottom: 4rem !important; /* Çizgilerin rahatça oturacağı temiz bir taban alanı */
+  margin-left: auto !important;
+  width: 100% !important;
+}
+
+/* Mobil ekranlar için de çizgilerin yerini garantiye alıyoruz */
+@media (max-width: 900px) {
+  .testimonials .slider-controls {
+    left: 0 !important;
+    bottom: -1.5rem !important;
+  }
+  
+  .testimonial-slider {
+    padding-left: 0 !important;
+    padding-bottom: 3rem !important;
+  }
+}
+
