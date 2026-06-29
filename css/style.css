@@ -1321,16 +1321,24 @@ button {
   }
 }
 
-.hero__location-badge {
+.hero__logo-badge {
   position: absolute;
-  top: calc(var(--site-pad) + 3.2rem); /* Logonun hemen altına hizalar */
-  left: var(--site-pad); /* Logo ile aynı sol hizaya getirir */
+  top: calc(1.35rem + 2.8rem); 
+  left: var(--site-pad);      
+  
   font-family: var(--font-main);
-  font-size: 0.75rem;
+  font-size: 0.68rem;
   text-transform: uppercase;
-  letter-spacing: 0.2em;
+  letter-spacing: 0.22em;
   color: var(--color-white);
-  opacity: 0.5; /* Beyaz silik görünüm için */
-  z-index: 10; /* Videonun üstünde kalması için */
+  opacity: 0.55; 
+  z-index: 10;  
   margin: 0;
+  pointer-events: none;
+}
+
+@media (max-width: 680px) {
+  .hero__logo-badge {
+    top: calc(0.95rem + 2.7rem);
+  }
 }
