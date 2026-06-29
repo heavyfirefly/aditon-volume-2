@@ -282,6 +282,8 @@ button {
 }
 
 .hero__content {
+  position: relative;
+  z-index: 1;
   width: min(100% - (var(--site-pad) * 2), 1060px);
   margin-inline: auto;
   text-align: center;
