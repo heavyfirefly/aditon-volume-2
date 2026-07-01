@@ -202,6 +202,116 @@ document.addEventListener('click', (event) => {
   event.stopPropagation();
 
   const currentSrc = mainImage.getAttribute('src');
+  // Proje Kartlarına Tıklanınca Modalı Açan Güvenli Kod
+document.querySelectorAll('[data-project-id]').forEach((card) => {
+  card.addEventListener('click', (event) => {
+    // EĞER modal zaten açıksa ve içerideki resimlere tıklanıyorsa kartı tetikleme!
+    if (document.body.classList.contains('modal-open')) return;
+    
+    const project = projects[Number(card.dataset.projectId)];
+    if (project) {
+      showProjectModal(project);
+    }
+  });
+});
+
+// Sayfa yukarı kaydırma butonu
+if (backTop) {
+  backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+}
+
+// Otomatik yıl güncellemesi
+const yearElement = document.querySelector('[data-year]');
+if (yearElement) {
+  yearElement.textContent = new Date().getFullYear();
+}
+
+// Sayfa yüklenme animasyon tetikleyicileri
+window.addEventListener('load', () => {
+  window.setTimeout(() => document.body.classList.add('loaded'), 420);
+});
+window.setTimeout(() => document.body.classList.add('loaded'), 1800);
+
+
+// ==========================================
+// MODAL GÖSTERİMİ VE GALERİ İŞLEMLERİ
+// ==========================================
+function showProjectModal(project) {
+  const modal = document.querySelector('[data-modal]');
+  const mainImage = document.querySelector('[data-modal-image]');
+  const category = document.querySelector('[data-modal-category]');
+  const title = document.getElementById('modal-title');
+  const year = document.querySelector('[data-modal-year]');
+  const location = document.querySelector('[data-modal-location]');
+  const area = document.querySelector('[data-modal-area]');
+  const description = document.querySelector('[data-modal-description]');
+  const galleryContainer = document.querySelector('[data-modal-gallery]');
+
+  if (!modal || !mainImage) return;
+
+  // Bilgileri dolduruyoruz
+  mainImage.setAttribute('src', project.image);
+  if (category) category.textContent = project.category;
+  if (title) title.textContent = project.title;
+  if (year) year.textContent = project.year;
+  if (location) location.textContent = project.location;
+  if (area) area.textContent = project.area;
+  if (description) description.textContent = project.description;
+
+  // Galeriyi temizle ve yeniden oluştur
+  if (galleryContainer) {
+    if (project.gallery && project.gallery.length > 0) {
+      galleryContainer.innerHTML = project.gallery
+        .map((src) => `<img src="${src}" alt="${project.title} detail" loading="lazy" />`)
+        .join('');
+        
+      // Küçük resimlerin başlangıç opaklığını ayarla
+      galleryContainer.querySelectorAll('img').forEach(img => img.style.opacity = '0.5');
+    } else {
+      galleryContainer.innerHTML = '';
+    }
+  }
+
+  // Modalı göster
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+}
+
+// =======================================================
+// GÜVENLİ VE İZOLE GALERİ TIKLAMA KONTROLLERİ
+// =======================================================
+
+// 1. Alttaki Küçük Resimlere Tıklayınca Büyük Resmi Değiştirme
+document.addEventListener('click', (event) => {
+  const galleryImg = event.target.closest('[data-modal-gallery] img');
+  if (!galleryImg) return; 
+
+  event.preventDefault();
+  event.stopPropagation(); // Tıklamanın kartlara sızmasını önler
+
+  const mainImage = document.querySelector('[data-modal-image]');
+  if (mainImage) {
+    mainImage.setAttribute('src', galleryImg.getAttribute('src'));
+    
+    // Aktiflik efektini güncelle
+    document.querySelectorAll('[data-modal-gallery] img').forEach(img => {
+      img.style.opacity = '0.5';
+      img.style.border = 'none';
+    });
+    galleryImg.style.opacity = '1';
+    galleryImg.style.border = '2px solid #ffffff';
+  }
+});
+
+// 2. Büyük Resme Tıklayınca Sıradaki Resme Geçme
+document.addEventListener('click', (event) => {
+  const mainImage = event.target.closest('[data-modal-image]');
+  if (!mainImage) return; 
+
+  event.preventDefault();
+  event.stopPropagation(); // Tıklamanın kartlara sızmasını önler
+
+  const currentSrc = mainImage.getAttribute('src');
   const galleryImages = Array.from(document.querySelectorAll('[data-modal-gallery] img'));
   if (galleryImages.length === 0) return;
 
