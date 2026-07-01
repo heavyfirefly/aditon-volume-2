@@ -1477,3 +1477,22 @@ button {
   cursor: pointer; /* Büyük resmin de geçiş yapılabilir olduğunu göstermek için */
 }
 
+/* Büyük resmin kırpılmadan tam sığması */
+.project-modal__media img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: contain !important; 
+  background: #111111; 
+  cursor: pointer;
+}
+
+/* Küçük resimlerin şık durması ve hover efekti */
+[data-modal-gallery] img {
+  cursor: pointer;
+  transition: opacity 0.2s ease, border 0.2s ease;
+  opacity: 0.5;
+}
+
+[data-modal-gallery] img:hover {
+  opacity: 0.8;
+}
