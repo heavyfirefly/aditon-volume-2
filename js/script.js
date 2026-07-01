@@ -30,15 +30,15 @@ const projects = [
     gallery: ['assets/project2.jpg', 'assets/project1.jpg', 'assets/project3.jpg'],
   },
   {
-    title: 'Urban Frame',
-    category: 'Visualization',
-    year: '2025',
-    location: 'İstanbul',
-    area: '8.200 m²',
-    image: 'assets/project3.jpg',
+    title: 'Akbulut Icon',
+    category: 'Kentsel Dönüşüm',
+    year: '2026',
+    location: 'İstanbul - Büyükçekmece',
+    area: '2.500 m²',
+    image: 'assets/ıcon1.png',
     description:
       'A visual study for an urban residential frame, developed to clarify mass, depth and evening atmosphere.',
-    gallery: ['assets/project3.jpg', 'assets/project1.jpg', 'assets/project2.jpg'],
+    gallery: ['assets/ıcon2.png', 'assets/ıcon3.png', 'assets/ıcon4.png', 'assets/ıcon5.png', 'assets/ıcon6.png', 'assets/ıcon7.png'],
   },
 ];
 
