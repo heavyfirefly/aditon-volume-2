@@ -14,7 +14,8 @@ const projects = [
     location: 'Büyükçekmece',
     area: '32420 m²',
     image: 'assets/ads1.png',
-    description: 'Kordonboyu Caddesi üzerinde bulunan kentsel dönüşüm projemiz, panoramik balonlarla kesintisiz deniz manzarasını kullanıcılarına sunmaktadır.',
+    description:
+      'Kordonboyu Caddesi üzerinde bulunan kentsel dönüşüm projemiz, panoramik balonlarla kesintisiz deniz manzarasını kullanıcılarına sunmaktadır.',
     gallery: ['assets/ads2.png', 'assets/ads3.png', 'assets/ads5.png', 'assets/ads6.png'],
   },
   {
@@ -24,109 +25,216 @@ const projects = [
     location: 'İstanbul',
     area: '165 m²',
     image: 'assets/project2.jpg',
-    description: 'A calm interior proposal defined by limestone surfaces, warm joinery and carefully held daylight.',
+    description:
+      'A calm interior proposal defined by limestone surfaces, warm joinery and carefully held daylight.',
     gallery: ['assets/project2.jpg', 'assets/project1.jpg', 'assets/project3.jpg'],
   },
   {
-    title: 'Akbulut Plaza',
-    category: 'Commercial',
-    year: '2024',
-    location: 'Büyükçekmece',
-    area: '12000 m²',
-    image: 'assets/ads4.png',
-    description: 'Modern office blocks integrated with social terraces and a double-skin facade system for climate control.',
-    gallery: ['assets/ads4.png'],
-  }
+    title: 'Akbulut Icon',
+    category: 'Kentsel Dönüşüm',
+    year: '2026',
+    location: 'İstanbul - Büyükçekmece',
+    area: '2.500 m²',
+    image: 'assets/ıcon1.png',
+    description:
+      'A visual study for an urban residential frame, developed to clarify mass, depth and evening atmosphere.',
+    gallery: ['assets/ıcon2.png', 'assets/ıcon3.png', 'assets/ıcon4.png', 'assets/ıcon5.png', 'assets/ıcon6.png', 'assets/ıcon7.png'],
+  },
 ];
 
-// HEADER VE NAVİGASYON
-const handleScroll = () => {
-  if (!header) return;
-  header.classList.toggle('is-scrolled', window.scrollY > 50);
-  if (backTop) backTop.classList.toggle('is-visible', window.scrollY > 300);
-};
+function setHeaderState() {
+  const isScrolled = window.scrollY > 40;
+  header.classList.toggle('scrolled', isScrolled);
+  backTop.classList.toggle('visible', window.scrollY > window.innerHeight * 0.7);
 
-window.addEventListener('scroll', handleScroll, { passive: true });
-
-if (navToggle && navMenu) {
-  navToggle.addEventListener('click', () => {
-    const isOpen = navMenu.getAttribute('aria-hidden') === 'false';
-    navMenu.setAttribute('aria-hidden', isOpen ? 'true' : 'false');
-    navToggle.setAttribute('aria-expanded', isOpen ? 'false' : 'true');
-    document.body.classList.toggle('nav-open', !isOpen);
-  });
+  if (parallaxImage && !prefersReducedMotion) {
+    parallaxImage.style.transform = 'translate3d(0, ' + window.scrollY * 0.12 + 'px, 0) scale(1.04)';
+  }
 }
 
-navLinks.forEach((link) => {
-  link.addEventListener('click', () => {
-    if (navMenu) {
-      navMenu.setAttribute('aria-hidden', 'true');
-      navToggle.setAttribute('aria-expanded', 'false');
-      document.body.classList.remove('nav-open');
+function toggleMenu(forceOpen) {
+  const open = typeof forceOpen === 'boolean' ? forceOpen : !navMenu.classList.contains('is-open');
+  navMenu.classList.toggle('is-open', open);
+  header.classList.toggle('menu-active', open);
+  navToggle.setAttribute('aria-expanded', String(open));
+  navToggle.setAttribute('aria-label', open ? 'Menüyü kapat' : 'Menüyü aç');
+  document.body.classList.toggle('nav-open', open);
+}
+
+navToggle.addEventListener('click', () => toggleMenu());
+navLinks.forEach((link) => link.addEventListener('click', () => toggleMenu(false)));
+
+window.addEventListener('scroll', setHeaderState, { passive: true });
+setHeaderState();
+
+const revealObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (entry.isIntersecting) {
+        entry.target.classList.add('in-view');
+        revealObserver.unobserve(entry.target);
+      }
+    });
+  },
+  { threshold: 0.16, rootMargin: '0px 0px -8% 0px' }
+);
+
+document.querySelectorAll('.reveal, .reveal-left, .reveal-right, .reveal-scale').forEach((element) => {
+  revealObserver.observe(element);
+});
+
+const sections = [...document.querySelectorAll('main section[id]')];
+const spyObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      navLinks.forEach((link) => {
+        link.classList.toggle('active', link.getAttribute('href') === '#' + entry.target.id);
+      });
+    });
+  },
+  { threshold: 0.38 }
+);
+
+sections.forEach((section) => spyObserver.observe(section));
+
+const counterObserver = new IntersectionObserver(
+  (entries) => {
+    entries.forEach((entry) => {
+      if (!entry.isIntersecting) return;
+      animateCounter(entry.target);
+      counterObserver.unobserve(entry.target);
+    });
+  },
+  { threshold: 0.6 }
+);
+
+document.querySelectorAll('[data-counter]').forEach((counter) => counterObserver.observe(counter));
+
+function animateCounter(element) {
+  const target = Number(element.dataset.target);
+  const duration = prefersReducedMotion ? 1 : 1300;
+  const start = performance.now();
+
+  function update(now) {
+    const progress = Math.min((now - start) / duration, 1);
+    const eased = 1 - Math.pow(1 - progress, 3);
+    element.textContent = Math.round(target * eased);
+    if (progress < 1) requestAnimationFrame(update);
+  }
+
+  requestAnimationFrame(update);
+}
+
+const modal = document.querySelector('[data-modal]');
+const modalTitle = document.querySelector('[data-modal-title]');
+const modalCategory = document.querySelector('[data-modal-category]');
+const modalYear = document.querySelector('[data-modal-year]');
+const modalLocation = document.querySelector('[data-modal-location]');
+const modalArea = document.querySelector('[data-modal-area]');
+const modalDescription = document.querySelector('[data-modal-description]');
+const modalImage = document.querySelector('[data-modal-image]');
+const modalGallery = document.querySelector('[data-modal-gallery]');
+let lastFocusedElement = null;
+
+function openProject(index) {
+  const project = projects[index];
+  if (!project) return;
+
+  lastFocusedElement = document.activeElement;
+  modalTitle.textContent = project.title;
+  modalCategory.textContent = project.category;
+  modalYear.textContent = project.year;
+  modalLocation.textContent = project.location;
+  modalArea.textContent = project.area;
+  modalDescription.textContent = project.description;
+  modalImage.src = project.image;
+  modalImage.alt = project.title;
+  modalGallery.innerHTML = project.gallery
+    .map((src) => '<img src="' + src + '" alt="' + project.title + ' detail" loading="lazy" />')
+    .join('');
+
+  modal.classList.add('is-open');
+  modal.setAttribute('aria-hidden', 'false');
+  document.body.classList.add('modal-open');
+  modal.querySelector('.modal-close').focus();
+}
+
+function closeProject() {
+  modal.classList.remove('is-open');
+  modal.setAttribute('aria-hidden', 'true');
+  document.body.classList.remove('modal-open');
+  if (lastFocusedElement) lastFocusedElement.focus();
+}
+
+document.querySelectorAll('[data-project]').forEach((card) => {
+  const index = Number(card.dataset.project);
+  card.addEventListener('click', () => openProject(index));
+  card.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      openProject(index);
     }
   });
 });
 
-// PARALLAX EFEKTİ
-if (parallaxImage && !prefersReducedMotion) {
-  window.addEventListener('scroll', () => {
-    const speed = 0.4;
-    const rect = parallaxImage.parentElement.getBoundingClientRect();
-    if (rect.top < window.innerHeight && rect.bottom > 0) {
-      const shift = (window.innerHeight - rect.top) * speed;
-      parallaxImage.style.transform = `translate3d(0, ${shift}px, 0)`;
-    }
-  }, { passive: true });
+document.querySelectorAll('[data-modal-close]').forEach((element) => {
+  element.addEventListener('click', closeProject);
+});
+
+document.addEventListener('keydown', (event) => {
+  if (event.key === 'Escape' && modal.classList.contains('is-open')) closeProject();
+});
+
+const slider = document.querySelector('[data-slider]');
+const testimonials = slider ? [...slider.querySelectorAll('.testimonial')] : [];
+const sliderButtons = slider ? [...slider.querySelectorAll('[data-slide]')] : [];
+let activeSlide = 0;
+let slideTimer = null;
+
+function showSlide(index) {
+  activeSlide = index;
+  testimonials.forEach((slide, slideIndex) => slide.classList.toggle('active', slideIndex === index));
+  sliderButtons.forEach((button, buttonIndex) => button.classList.toggle('active', buttonIndex === index));
 }
 
-// SLIDER (TESTIMONIALS)
-const slides = [...document.querySelectorAll('.testimonial')];
-const sliderButtons = [...document.querySelectorAll('[data-slide]')];
-let currentSlide = 0;
-let sliderInterval;
-
-const showSlide = (index) => {
-  slides.forEach((slide, i) => slide.classList.toggle('is-active', i === index));
-  sliderButtons.forEach((btn, i) => btn.classList.toggle('is-active', i === index));
-  currentSlide = index;
-};
-
-const nextSlide = () => showSlide((currentSlide + 1) % slides.length);
-const startSlider = () => { clearInterval(sliderInterval); sliderInterval = window.setInterval(nextSlide, 5000); };
+function startSlider() {
+  if (prefersReducedMotion || testimonials.length < 2) return;
+  slideTimer = window.setInterval(() => showSlide((activeSlide + 1) % testimonials.length), 4800);
+}
 
 sliderButtons.forEach((button) => {
   button.addEventListener('click', () => {
+    window.clearInterval(slideTimer);
     showSlide(Number(button.dataset.slide));
     startSlider();
   });
 });
-if (slides.length) startSlider();
 
-// FORM İŞLEMLERİ
+startSlider();
+
 const form = document.querySelector('[data-contact-form]');
 const formStatus = document.querySelector('[data-form-status]');
 
-if (form) {
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const fields = [...form.querySelectorAll('input, textarea')];
-    const invalidFields = fields.filter((field) => !field.checkValidity());
-    fields.forEach((field) => field.closest('label').classList.toggle('invalid', !field.checkValidity()));
+form.addEventListener('submit', (event) => {
+  event.preventDefault();
+  const fields = [...form.querySelectorAll('input, textarea')];
+  const invalidFields = fields.filter((field) => !field.checkValidity());
 
-    if (invalidFields.length) {
-      if (formStatus) formStatus.textContent = 'Please complete the required fields.';
-      invalidFields[0].focus();
-      return;
-    }
-    if (formStatus) formStatus.textContent = 'Thank you. We will contact you shortly.';
-    form.reset();
-  });
-}
+  fields.forEach((field) => field.closest('label').classList.toggle('invalid', !field.checkValidity()));
 
-// RIPPLE EFFECT
+  if (invalidFields.length) {
+    formStatus.textContent = 'Please complete the required fields.';
+    invalidFields[0].focus();
+    return;
+  }
+
+  formStatus.textContent = 'Thank you. We will contact you shortly.';
+  form.reset();
+});
+
 document.querySelectorAll('.button').forEach((button) => {
   button.addEventListener('click', (event) => {
-    if (event.target !== button && !event.target.classList.contains('button')) return;
     const ripple = document.createElement('span');
     ripple.className = 'ripple';
     ripple.style.left = event.offsetX + 'px';
@@ -136,136 +244,12 @@ document.querySelectorAll('.button').forEach((button) => {
   });
 });
 
-if (backTop) {
-  backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-}
+backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 
-const yearElement = document.querySelector('[data-year]');
-if (yearElement) yearElement.textContent = new Date().getFullYear();
+document.querySelector('[data-year]').textContent = new Date().getFullYear();
 
-window.addEventListener('load', () => window.setTimeout(() => document.body.classList.add('loaded'), 420));
+window.addEventListener('load', () => {
+  window.setTimeout(() => document.body.classList.add('loaded'), 420);
+});
+
 window.setTimeout(() => document.body.classList.add('loaded'), 1800);
-
-
-// =======================================================
-// GÜVENLİ VE AYRIŞTIRILMIŞ MODAL / GALERİ SİSTEMİ
-// =======================================================
-
-// 1. Proje Kartlarına Tıklanınca Modalı Güvenli Açma
-document.querySelectorAll('[data-project-id]').forEach((card) => {
-  card.addEventListener('click', (event) => {
-    if (document.body.classList.contains('modal-open')) return;
-    
-    const project = projects[Number(card.dataset.projectId)];
-    if (project) {
-      showProjectModal(project);
-    }
-  });
-});
-
-function showProjectModal(project) {
-  const modal = document.querySelector('[data-modal]');
-  const mainImage = document.querySelector('[data-modal-image]');
-  const category = document.querySelector('[data-modal-category]');
-  const title = document.getElementById('modal-title');
-  const year = document.querySelector('[data-modal-year]');
-  const location = document.querySelector('[data-modal-location]');
-  const area = document.querySelector('[data-modal-area]');
-  const description = document.querySelector('[data-modal-description]');
-  const galleryContainer = document.querySelector('[data-modal-gallery]');
-
-  if (!modal || !mainImage) return;
-
-  mainImage.setAttribute('src', project.image);
-  if (category) category.textContent = project.category;
-  if (title) title.textContent = project.title;
-  if (year) year.textContent = project.year;
-  if (location) location.textContent = project.location;
-  if (area) area.textContent = project.area;
-  if (description) description.textContent = project.description;
-
-  if (galleryContainer) {
-    if (project.gallery && project.gallery.length > 0) {
-      galleryContainer.innerHTML = project.gallery
-        .map((src) => `<img src="${src}" alt="${project.title} detail" loading="lazy" />`)
-        .join('');
-      
-      // İlk resmi aktif göster, diğerlerini hafif soluk yap
-      galleryContainer.querySelectorAll('img').forEach((img) => {
-        img.style.opacity = img.getAttribute('src') === project.image ? '1' : '0.5';
-        if (img.getAttribute('src') === project.image) img.style.border = '2px solid #ffffff';
-      });
-    } else {
-      galleryContainer.innerHTML = '';
-    }
-  }
-
-  modal.setAttribute('aria-hidden', 'false');
-  document.body.classList.add('modal-open');
-}
-
-// 2. Modalı Kapatma Tetikleyicileri (Çakışma Önleyicili Kesin Kapatma)
-document.querySelectorAll('[data-modal-close]').forEach((closer) => {
-  closer.addEventListener('click', (event) => {
-    // Tıklama perdenin kendisine mi yapıldı yoksa içindeki galeriye mi? Ayrıştırıyoruz.
-    if (closer.classList.contains('project-modal__backdrop') && event.target !== closer) return;
-
-    const modal = document.querySelector('[data-modal]');
-    if (modal) {
-      modal.setAttribute('aria-hidden', 'true');
-      document.body.classList.remove('modal-open');
-    }
-  });
-});
-
-// 3. Küçük Resimlere Tıklayınca Büyük Resmi Değiştirme
-document.addEventListener('click', (event) => {
-  const galleryImg = event.target.closest('[data-modal-gallery] img');
-  if (!galleryImg) return;
-
-  event.preventDefault();
-  event.stopPropagation(); // Üst perdedeki kapatma tetiğine sızmayı engeller!
-
-  const mainImage = document.querySelector('[data-modal-image]');
-  if (mainImage) {
-    mainImage.setAttribute('src', galleryImg.getAttribute('src'));
-    
-    document.querySelectorAll('[data-modal-gallery] img').forEach(img => {
-      img.style.opacity = '0.5';
-      img.style.border = 'none';
-    });
-    galleryImg.style.opacity = '1';
-    galleryImg.style.border = '2px solid #ffffff';
-  }
-});
-
-// 4. Büyük Resme Tıklayınca Sıradaki Resme Geçme
-document.addEventListener('click', (event) => {
-  const mainImage = event.target.closest('[data-modal-image]');
-  if (!mainImage) return;
-
-  event.preventDefault();
-  event.stopPropagation(); // Üst perdedeki kapatma tetiğine sızmayı engeller!
-
-  const currentSrc = mainImage.getAttribute('src');
-  const galleryImages = Array.from(document.querySelectorAll('[data-modal-gallery] img'));
-  if (galleryImages.length === 0) return;
-
-  let currentIndex = galleryImages.findIndex(img => img.getAttribute('src') === currentSrc);
-  if (currentIndex === -1) currentIndex = -1;
-
-  const nextIndex = (currentIndex + 1) % galleryImages.length;
-  const nextSrc = galleryImages[nextIndex].getAttribute('src');
-
-  mainImage.setAttribute('src', nextSrc);
-
-  galleryImages.forEach((img, idx) => {
-    if (idx === nextIndex) {
-      img.style.opacity = '1';
-      img.style.border = '2px solid #ffffff';
-    } else {
-      img.style.opacity = '0.5';
-      img.style.border = 'none';
-    }
-  });
-});
