@@ -126,232 +126,104 @@ function animateCounter(element) {
   requestAnimationFrame(update);
 }
 
-const modal = document.querySelector('[data-modal]');
-const modalTitle = document.querySelector('[data-modal-title]');
-const modalCategory = document.querySelector('[data-modal-category]');
-const modalYear = document.querySelector('[data-modal-year]');
-const modalLocation = document.querySelector('[data-modal-location]');
-const modalArea = document.querySelector('[data-modal-area]');
-const modalDescription = document.querySelector('[data-modal-description]');
-const modalImage = document.querySelector('[data-modal-image]');
-const modalGallery = document.querySelector('[data-modal-gallery]');
-let lastFocusedElement = null;
+function showProjectModal(project) {
+  const modal = document.querySelector('[data-modal]');
+  const mainImage = document.querySelector('[data-modal-image]');
+  const category = document.querySelector('[data-modal-category]');
+  const title = document.getElementById('modal-title');
+  const year = document.querySelector('[data-modal-year]');
+  const location = document.querySelector('[data-modal-location]');
+  const area = document.querySelector('[data-modal-area]');
+  const description = document.querySelector('[data-modal-description]');
+  const galleryContainer = document.querySelector('[data-modal-gallery]');
 
-function openProject(index) {
-  const project = projects[index];
-  if (!project) return;
+  if (!modal || !mainImage) return;
 
-  lastFocusedElement = document.activeElement;
-  modalTitle.textContent = project.title;
-  modalCategory.textContent = project.category;
-  modalYear.textContent = project.year;
-  modalLocation.textContent = project.location;
-  modalArea.textContent = project.area;
-  modalDescription.textContent = project.description;
-  modalImage.src = project.image;
-  modalImage.alt = project.title;
-  modalGallery.innerHTML = project.gallery
-    // Modal içindeki küçük resimlere tıklama dinleyicisi
-document.addEventListener('click', (event) => {
-  // Eğer tıklanan eleman modal galerisindeki bir küçük resimse
-  if (event.target.matches('[data-modal-gallery] img')) {
-    const clickedSrc = event.target.getAttribute('src');
-    const mainImage = document.querySelector('[data-modal-image]');
-    
-    if (mainImage) {
-      // Ana büyük resmin kaynağını değiştiriyoruz
-      mainImage.setAttribute('src', clickedSrc);
-      
-      // Küçük resimler arasında aktiflik (seçili olma) efektini güncelleme
-      document.querySelectorAll('[data-modal-gallery] img').forEach(img => {
-        img.style.opacity = '0.5';
-        img.style.border = 'none';
-      });
-      event.target.style.opacity = '1';
-      event.target.style.border = '2px solid var(--color-white, #fff)';
+  // Bilgileri dolduruyoruz
+  mainImage.setAttribute('src', project.image);
+  if (category) category.textContent = project.category;
+  if (title) title.textContent = project.title;
+  if (year) year.textContent = project.year;
+  if (location) location.textContent = project.location;
+  if (area) area.textContent = project.area;
+  if (description) description.textContent = project.description;
+
+  // Galeriyi temizle ve yeniden oluştur
+  if (galleryContainer) {
+    if (project.gallery && project.gallery.length > 0) {
+      galleryContainer.innerHTML = project.gallery
+        .map((src) => `<img src="${src}" alt="${project.title} detail" loading="lazy" />`)
+        .join('');
+        
+      // Küçük resimlerin başlangıç opaklığını ayarla
+      galleryContainer.querySelectorAll('img').forEach(img => img.style.opacity = '0.5');
+    } else {
+      galleryContainer.innerHTML = '';
     }
   }
-});
-    .map((src) => '<img src="' + src + '" alt="' + project.title + ' detail" loading="lazy" />')
-    .join('');
 
-  modal.classList.add('is-open');
+  // Modalı göster
   modal.setAttribute('aria-hidden', 'false');
   document.body.classList.add('modal-open');
-  modal.querySelector('.modal-close').focus();
 }
-
-function closeProject() {
-  modal.classList.remove('is-open');
-  modal.setAttribute('aria-hidden', 'true');
-  document.body.classList.remove('modal-open');
-  if (lastFocusedElement) lastFocusedElement.focus();
-}
-
-document.querySelectorAll('[data-project]').forEach((card) => {
-  const index = Number(card.dataset.project);
-  card.addEventListener('click', () => openProject(index));
-  card.addEventListener('keydown', (event) => {
-    if (event.key === 'Enter' || event.key === ' ') {
-      event.preventDefault();
-      openProject(index);
-    }
-  });
-});
-
-document.querySelectorAll('[data-modal-close]').forEach((element) => {
-  element.addEventListener('click', closeProject);
-});
-
-document.addEventListener('keydown', (event) => {
-  if (event.key === 'Escape' && modal.classList.contains('is-open')) closeProject();
-});
-
-const slider = document.querySelector('[data-slider]');
-const testimonials = slider ? [...slider.querySelectorAll('.testimonial')] : [];
-const sliderButtons = slider ? [...slider.querySelectorAll('[data-slide]')] : [];
-let activeSlide = 0;
-let slideTimer = null;
-
-function showSlide(index) {
-  activeSlide = index;
-  testimonials.forEach((slide, slideIndex) => slide.classList.toggle('active', slideIndex === index));
-  sliderButtons.forEach((button, buttonIndex) => button.classList.toggle('active', buttonIndex === index));
-}
-
-function startSlider() {
-  if (prefersReducedMotion || testimonials.length < 2) return;
-  slideTimer = window.setInterval(() => showSlide((activeSlide + 1) % testimonials.length), 4800);
-}
-
-sliderButtons.forEach((button) => {
-  button.addEventListener('click', () => {
-    window.clearInterval(slideTimer);
-    showSlide(Number(button.dataset.slide));
-    startSlider();
-  });
-});
-
-startSlider();
-
-// ==========================================
-// FORM İŞLEMLERİ
-// ==========================================
-const form = document.querySelector('[data-contact-form]');
-const formStatus = document.querySelector('[data-form-status]');
-
-if (form) {
-  form.addEventListener('submit', (event) => {
-    event.preventDefault();
-    const fields = [...form.querySelectorAll('input, textarea')];
-    const invalidFields = fields.filter((field) => !field.checkValidity());
-
-    fields.forEach((field) => field.closest('label').classList.toggle('invalid', !field.checkValidity()));
-
-    if (invalidFields.length) {
-      if (formStatus) formStatus.textContent = 'Please complete the required fields.';
-      invalidFields[0].focus();
-      return;
-    }
-
-    if (formStatus) formStatus.textContent = 'Thank you. We will contact you shortly.';
-    form.reset();
-  });
-}
-
-// ==========================================
-// RIPPLE (DALGALANMA) EFEKTİ - GÜVENLİ SÜRÜM
-// ==========================================
-document.querySelectorAll('.button').forEach((button) => {
-  button.addEventListener('click', (event) => {
-    // Eğer tıklanan şey bir butonun kendisi değilse veya yayılmadan geldiyse döngüyü kırıyoruz
-    if (event.target !== button && !event.target.classList.contains('button')) return;
-    
-    const ripple = document.createElement('span');
-    ripple.className = 'ripple';
-    ripple.style.left = event.offsetX + 'px';
-    ripple.style.top = event.offsetY + 'px';
-    button.append(ripple);
-    window.setTimeout(() => ripple.remove(), 700);
-  });
-});
-
-// Sayfa yukarı kaydırma butonu
-if (backTop) {
-  backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
-}
-
-// Otomatik yıl güncellemesi
-const yearElement = document.querySelector('[data-year]');
-if (yearElement) {
-  yearElement.textContent = new Date().getFullYear();
-}
-
-// Sayfa yüklenme animasyon tetikleyicileri
-window.addEventListener('load', () => {
-  window.setTimeout(() => document.body.classList.add('loaded'), 420);
-});
-window.setTimeout(() => document.body.classList.add('loaded'), 1800);
-
 
 // =======================================================
-// PROJE MODAL GALERİSİ KİLİTLENMEYEN GÜVENLİ KONTROLLERİ
+// GÜVENLİ VE İZOLE GALERİ TIKLAMA KONTROLLERİ
 // =======================================================
 
 // 1. Alttaki Küçük Resimlere Tıklayınca Büyük Resmi Değiştirme
 document.addEventListener('click', (event) => {
-  if (event.target.matches('[data-modal-gallery] img')) {
-    event.preventDefault();
-    event.stopPropagation(); // Tıklamanın yukarı sızmasını kesin olarak engeller
+  const galleryImg = event.target.closest('[data-modal-gallery] img');
+  if (!galleryImg) return; 
+
+  event.preventDefault();
+  event.stopPropagation();
+
+  const mainImage = document.querySelector('[data-modal-image]');
+  if (mainImage) {
+    mainImage.setAttribute('src', galleryImg.getAttribute('src'));
     
-    const clickedSrc = event.target.getAttribute('src');
-    const mainImage = document.querySelector('[data-modal-image]');
-    
-    if (mainImage) {
-      mainImage.setAttribute('src', clickedSrc);
-      
-      // Tıklanan resmi aktif yap, diğerlerini soluklaştır
-      document.querySelectorAll('[data-modal-gallery] img').forEach(img => {
-        img.style.opacity = '0.5';
-        img.style.border = 'none';
-      });
-      event.target.style.opacity = '1';
-      event.target.style.border = '2px solid #ffffff';
-    }
+    // Aktiflik efektini güncelle
+    document.querySelectorAll('[data-modal-gallery] img').forEach(img => {
+      img.style.opacity = '0.5';
+      img.style.border = 'none';
+    });
+    galleryImg.style.opacity = '1';
+    galleryImg.style.border = '2px solid #ffffff';
   }
 });
 
 // 2. Büyük Resme Tıklayınca Sıradaki Resme Geçme
 document.addEventListener('click', (event) => {
-  if (event.target.matches('[data-modal-image]')) {
-    event.preventDefault();
-    event.stopPropagation(); // Döngü koruması
-    
-    const mainImage = event.target;
-    const currentSrc = mainImage.getAttribute('src');
-    
-    const galleryImages = Array.from(document.querySelectorAll('[data-modal-gallery] img'));
-    if (galleryImages.length === 0) return;
+  const mainImage = event.target.closest('[data-modal-image]');
+  if (!mainImage) return; 
 
-    let currentIndex = galleryImages.findIndex(img => img.getAttribute('src') === currentSrc);
-    
-    if (currentIndex === -1) {
-      currentIndex = -1; 
-    }
-    
-    const nextIndex = (currentIndex + 1) % galleryImages.length;
-    const nextSrc = galleryImages[nextIndex].getAttribute('src');
-    
-    mainImage.setAttribute('src', nextSrc);
-    
-    galleryImages.forEach((img, idx) => {
-      if (idx === nextIndex) {
-        img.style.opacity = '1';
-        img.style.border = '2px solid #ffffff';
-      } else {
-        img.style.opacity = '0.5';
-        img.style.border = 'none';
-      }
-    });
+  event.preventDefault();
+  event.stopPropagation();
+
+  const currentSrc = mainImage.getAttribute('src');
+  const galleryImages = Array.from(document.querySelectorAll('[data-modal-gallery] img'));
+  if (galleryImages.length === 0) return;
+
+  let currentIndex = galleryImages.findIndex(img => img.getAttribute('src') === currentSrc);
+  
+  if (currentIndex === -1) {
+    currentIndex = -1;
   }
+  
+  const nextIndex = (currentIndex + 1) % galleryImages.length;
+  const nextSrc = galleryImages[nextIndex].getAttribute('src');
+  
+  mainImage.setAttribute('src', nextSrc);
+  
+  // Alttaki küçük resimleri senkronize et
+  galleryImages.forEach((img, idx) => {
+    if (idx === nextIndex) {
+      img.style.opacity = '1';
+      img.style.border = '2px solid #ffffff';
+    } else {
+      img.style.opacity = '0.5';
+      img.style.border = 'none';
+    }
+  });
 });
