@@ -275,32 +275,65 @@ window.addEventListener('load', () => {
 
 window.setTimeout(() => document.body.classList.add('loaded'), 1800);
 
-// Büyük resme tıklayınca sonraki resme geçme mantığı
+// ==========================================
+// PROJE MODAL GALERİSİ DİNAMİK KONTROLLERİ
+// ==========================================
+
+// 1. Alttaki Küçük Resimlere Tıklayınca Büyük Resmi Değiştirme
+document.addEventListener('click', (event) => {
+  if (event.target.matches('[data-modal-gallery] img')) {
+    const clickedSrc = event.target.getAttribute('src');
+    const mainImage = document.querySelector('[data-modal-image]');
+    
+    if (mainImage) {
+      mainImage.setAttribute('src', clickedSrc);
+      
+      // Tıklanan resmi görsel olarak aktif yap, diğerlerini soluklaştır
+      document.querySelectorAll('[data-modal-gallery] img').forEach(img => {
+        img.style.opacity = '0.5';
+        img.style.border = 'none';
+      });
+      event.target.style.opacity = '1';
+      event.target.style.border = '2px solid #ffffff';
+    }
+  }
+});
+
+// 2. Büyük Resme Tıklayınca Sıradaki Resme Geçme (Hatasız Döngü)
 document.addEventListener('click', (event) => {
   if (event.target.matches('[data-modal-image]')) {
     const mainImage = event.target;
     const currentSrc = mainImage.getAttribute('src');
     
-    // Galerideki tüm küçük resimleri diziye alıyoruz
+    // Galerideki tüm küçük resimleri alıyoruz
     const galleryImages = Array.from(document.querySelectorAll('[data-modal-gallery] img'));
-    if (galleryImages.length <= 1) return; // Eğer tek resim varsa geçiş yapma
+    if (galleryImages.length === 0) return;
+
+    // Mevcut büyük resmin galerideki sırasını buluyoruz
+    let currentIndex = galleryImages.findIndex(img => img.getAttribute('src') === currentSrc);
     
-    // Mevcut resmin index'ini buluyoruz
-    const currentIndex = galleryImages.findIndex(img => img.getAttribute('src') === currentSrc);
+    // EĞER büyük resim kapak resmi ise ve galeride yoksa (-1 döndüyse) sıfırdan başlasın
+    if (currentIndex === -1) {
+      currentIndex = -1; 
+    }
     
-    // Bir sonraki index'i hesaplıyoruz (son resme geldiyse başa dönecek şekilde)
+    // Bir sonraki resmin index'ini hesapla (Sona gelirse başa döner)
     const nextIndex = (currentIndex + 1) % galleryImages.length;
     const nextSrc = galleryImages[nextIndex].getAttribute('src');
     
     // Büyük resmi güncelle
     mainImage.setAttribute('src', nextSrc);
     
-    // Küçük resimlerdeki aktiflik stilini de güncelle
-    galleryImages.forEach(img => {
-      img.style.opacity = '0.5';
-      img.style.border = 'none';
+    // Alttaki küçük resimlerin aktiflik efektini senkronize et
+    galleryImages.forEach((img, idx) => {
+      if (idx === nextIndex) {
+        img.style.opacity = '1';
+        img.style.border = '2px solid #ffffff';
+      } else {
+        img.style.opacity = '0.5';
+        img.style.border = 'none';
+      }
     });
-    galleryImages[nextIndex].style.opacity = '1';
-    galleryImages[nextIndex].style.border = '2px solid var(--color-white, #fff)';
   }
 });
+
