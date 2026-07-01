@@ -234,28 +234,39 @@ sliderButtons.forEach((button) => {
 
 startSlider();
 
+// ==========================================
+// FORM İŞLEMLERİ
+// ==========================================
 const form = document.querySelector('[data-contact-form]');
 const formStatus = document.querySelector('[data-form-status]');
 
-form.addEventListener('submit', (event) => {
-  event.preventDefault();
-  const fields = [...form.querySelectorAll('input, textarea')];
-  const invalidFields = fields.filter((field) => !field.checkValidity());
+if (form) {
+  form.addEventListener('submit', (event) => {
+    event.preventDefault();
+    const fields = [...form.querySelectorAll('input, textarea')];
+    const invalidFields = fields.filter((field) => !field.checkValidity());
 
-  fields.forEach((field) => field.closest('label').classList.toggle('invalid', !field.checkValidity()));
+    fields.forEach((field) => field.closest('label').classList.toggle('invalid', !field.checkValidity()));
 
-  if (invalidFields.length) {
-    formStatus.textContent = 'Please complete the required fields.';
-    invalidFields[0].focus();
-    return;
-  }
+    if (invalidFields.length) {
+      if (formStatus) formStatus.textContent = 'Please complete the required fields.';
+      invalidFields[0].focus();
+      return;
+    }
 
-  formStatus.textContent = 'Thank you. We will contact you shortly.';
-  form.reset();
-});
+    if (formStatus) formStatus.textContent = 'Thank you. We will contact you shortly.';
+    form.reset();
+  });
+}
 
+// ==========================================
+// RIPPLE (DALGALANMA) EFEKTİ - GÜVENLİ SÜRÜM
+// ==========================================
 document.querySelectorAll('.button').forEach((button) => {
   button.addEventListener('click', (event) => {
+    // Eğer tıklanan şey bir butonun kendisi değilse veya yayılmadan geldiyse döngüyü kırıyoruz
+    if (event.target !== button && !event.target.classList.contains('button')) return;
+    
     const ripple = document.createElement('span');
     ripple.className = 'ripple';
     ripple.style.left = event.offsetX + 'px';
@@ -270,13 +281,13 @@ if (backTop) {
   backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
 }
 
-// Alt kısımdaki otomatik yıl güncellemesi
+// Otomatik yıl güncellemesi
 const yearElement = document.querySelector('[data-year]');
 if (yearElement) {
   yearElement.textContent = new Date().getFullYear();
 }
 
-// Sayfa yüklenme sınıfı tetikleyicileri
+// Sayfa yüklenme animasyon tetikleyicileri
 window.addEventListener('load', () => {
   window.setTimeout(() => document.body.classList.add('loaded'), 420);
 });
@@ -290,7 +301,9 @@ window.setTimeout(() => document.body.classList.add('loaded'), 1800);
 // 1. Alttaki Küçük Resimlere Tıklayınca Büyük Resmi Değiştirme
 document.addEventListener('click', (event) => {
   if (event.target.matches('[data-modal-gallery] img')) {
-    event.stopPropagation(); // Diğer tıklama olaylarını tetiklemesini önler (Döngü Kırıcı)
+    event.preventDefault();
+    event.stopPropagation(); // Tıklamanın yukarı sızmasını kesin olarak engeller
+    
     const clickedSrc = event.target.getAttribute('src');
     const mainImage = document.querySelector('[data-modal-image]');
     
@@ -311,7 +324,9 @@ document.addEventListener('click', (event) => {
 // 2. Büyük Resme Tıklayınca Sıradaki Resme Geçme
 document.addEventListener('click', (event) => {
   if (event.target.matches('[data-modal-image]')) {
-    event.stopPropagation(); // Sonsuz döngü zincirini burada kırıyoruz
+    event.preventDefault();
+    event.stopPropagation(); // Döngü koruması
+    
     const mainImage = event.target;
     const currentSrc = mainImage.getAttribute('src');
     
@@ -320,7 +335,6 @@ document.addEventListener('click', (event) => {
 
     let currentIndex = galleryImages.findIndex(img => img.getAttribute('src') === currentSrc);
     
-    // Eğer kapak görseliyse ya da listede yoksa sıfırdan başlasın
     if (currentIndex === -1) {
       currentIndex = -1; 
     }
