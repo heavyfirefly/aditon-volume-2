@@ -265,30 +265,39 @@ document.querySelectorAll('.button').forEach((button) => {
   });
 });
 
-backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+// Sayfa yukarı kaydırma butonu
+if (backTop) {
+  backTop.addEventListener('click', () => window.scrollTo({ top: 0, behavior: 'smooth' }));
+}
 
-document.querySelector('[data-year]').textContent = new Date().getFullYear();
+// Alt kısımdaki otomatik yıl güncellemesi
+const yearElement = document.querySelector('[data-year]');
+if (yearElement) {
+  yearElement.textContent = new Date().getFullYear();
+}
 
+// Sayfa yüklenme sınıfı tetikleyicileri
 window.addEventListener('load', () => {
   window.setTimeout(() => document.body.classList.add('loaded'), 420);
 });
-
 window.setTimeout(() => document.body.classList.add('loaded'), 1800);
 
-// ==========================================
-// PROJE MODAL GALERİSİ DİNAMİK KONTROLLERİ
-// ==========================================
+
+// =======================================================
+// PROJE MODAL GALERİSİ KİLİTLENMEYEN GÜVENLİ KONTROLLERİ
+// =======================================================
 
 // 1. Alttaki Küçük Resimlere Tıklayınca Büyük Resmi Değiştirme
 document.addEventListener('click', (event) => {
   if (event.target.matches('[data-modal-gallery] img')) {
+    event.stopPropagation(); // Diğer tıklama olaylarını tetiklemesini önler (Döngü Kırıcı)
     const clickedSrc = event.target.getAttribute('src');
     const mainImage = document.querySelector('[data-modal-image]');
     
     if (mainImage) {
       mainImage.setAttribute('src', clickedSrc);
       
-      // Tıklanan resmi görsel olarak aktif yap, diğerlerini soluklaştır
+      // Tıklanan resmi aktif yap, diğerlerini soluklaştır
       document.querySelectorAll('[data-modal-gallery] img').forEach(img => {
         img.style.opacity = '0.5';
         img.style.border = 'none';
@@ -299,32 +308,28 @@ document.addEventListener('click', (event) => {
   }
 });
 
-// 2. Büyük Resme Tıklayınca Sıradaki Resme Geçme (Hatasız Döngü)
+// 2. Büyük Resme Tıklayınca Sıradaki Resme Geçme
 document.addEventListener('click', (event) => {
   if (event.target.matches('[data-modal-image]')) {
+    event.stopPropagation(); // Sonsuz döngü zincirini burada kırıyoruz
     const mainImage = event.target;
     const currentSrc = mainImage.getAttribute('src');
     
-    // Galerideki tüm küçük resimleri alıyoruz
     const galleryImages = Array.from(document.querySelectorAll('[data-modal-gallery] img'));
     if (galleryImages.length === 0) return;
 
-    // Mevcut büyük resmin galerideki sırasını buluyoruz
     let currentIndex = galleryImages.findIndex(img => img.getAttribute('src') === currentSrc);
     
-    // EĞER büyük resim kapak resmi ise ve galeride yoksa (-1 döndüyse) sıfırdan başlasın
+    // Eğer kapak görseliyse ya da listede yoksa sıfırdan başlasın
     if (currentIndex === -1) {
       currentIndex = -1; 
     }
     
-    // Bir sonraki resmin index'ini hesapla (Sona gelirse başa döner)
     const nextIndex = (currentIndex + 1) % galleryImages.length;
     const nextSrc = galleryImages[nextIndex].getAttribute('src');
     
-    // Büyük resmi güncelle
     mainImage.setAttribute('src', nextSrc);
     
-    // Alttaki küçük resimlerin aktiflik efektini senkronize et
     galleryImages.forEach((img, idx) => {
       if (idx === nextIndex) {
         img.style.opacity = '1';
@@ -336,4 +341,3 @@ document.addEventListener('click', (event) => {
     });
   }
 });
-
