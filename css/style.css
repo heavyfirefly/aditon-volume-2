@@ -960,9 +960,11 @@ button {
 }
 
 .project-modal__media img {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
+  width: 100% !important;
+  height: 100% !important;
+  /* Eski hali "cover" olduğu için kırpıyordu. "contain" yaparak resmin tamamını kutuya sığdırıyoruz */
+  object-fit: contain !important; 
+  background: #111111; /* Resmin arkasında kalan boşluklar sırıtmasın diye siyah veya koyu bir ton */
 }
 
 .project-modal__content {
