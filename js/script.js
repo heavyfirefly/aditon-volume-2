@@ -151,6 +151,27 @@ function openProject(index) {
   modalImage.src = project.image;
   modalImage.alt = project.title;
   modalGallery.innerHTML = project.gallery
+    // Modal içindeki küçük resimlere tıklama dinleyicisi
+document.addEventListener('click', (event) => {
+  // Eğer tıklanan eleman modal galerisindeki bir küçük resimse
+  if (event.target.matches('[data-modal-gallery] img')) {
+    const clickedSrc = event.target.getAttribute('src');
+    const mainImage = document.querySelector('[data-modal-image]');
+    
+    if (mainImage) {
+      // Ana büyük resmin kaynağını değiştiriyoruz
+      mainImage.setAttribute('src', clickedSrc);
+      
+      // Küçük resimler arasında aktiflik (seçili olma) efektini güncelleme
+      document.querySelectorAll('[data-modal-gallery] img').forEach(img => {
+        img.style.opacity = '0.5';
+        img.style.border = 'none';
+      });
+      event.target.style.opacity = '1';
+      event.target.style.border = '2px solid var(--color-white, #fff)';
+    }
+  }
+});
     .map((src) => '<img src="' + src + '" alt="' + project.title + ' detail" loading="lazy" />')
     .join('');
 
@@ -253,3 +274,33 @@ window.addEventListener('load', () => {
 });
 
 window.setTimeout(() => document.body.classList.add('loaded'), 1800);
+
+// Büyük resme tıklayınca sonraki resme geçme mantığı
+document.addEventListener('click', (event) => {
+  if (event.target.matches('[data-modal-image]')) {
+    const mainImage = event.target;
+    const currentSrc = mainImage.getAttribute('src');
+    
+    // Galerideki tüm küçük resimleri diziye alıyoruz
+    const galleryImages = Array.from(document.querySelectorAll('[data-modal-gallery] img'));
+    if (galleryImages.length <= 1) return; // Eğer tek resim varsa geçiş yapma
+    
+    // Mevcut resmin index'ini buluyoruz
+    const currentIndex = galleryImages.findIndex(img => img.getAttribute('src') === currentSrc);
+    
+    // Bir sonraki index'i hesaplıyoruz (son resme geldiyse başa dönecek şekilde)
+    const nextIndex = (currentIndex + 1) % galleryImages.length;
+    const nextSrc = galleryImages[nextIndex].getAttribute('src');
+    
+    // Büyük resmi güncelle
+    mainImage.setAttribute('src', nextSrc);
+    
+    // Küçük resimlerdeki aktiflik stilini de güncelle
+    galleryImages.forEach(img => {
+      img.style.opacity = '0.5';
+      img.style.border = 'none';
+    });
+    galleryImages[nextIndex].style.opacity = '1';
+    galleryImages[nextIndex].style.border = '2px solid var(--color-white, #fff)';
+  }
+});
