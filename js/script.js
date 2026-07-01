@@ -203,9 +203,12 @@ document.addEventListener('click', (event) => {
 
   const currentSrc = mainImage.getAttribute('src');
   // Proje Kartlarına Tıklanınca Modalı Açan Güvenli Kod
+// =======================================================
+// PROJE KARTLARI VE GÜVENLİ MODAL TETİKLEYİCİSİ
+// =======================================================
 document.querySelectorAll('[data-project-id]').forEach((card) => {
   card.addEventListener('click', (event) => {
-    // EĞER modal zaten açıksa ve içerideki resimlere tıklanıyorsa kartı tetikleme!
+    // Eğer halihazırda modal zaten açıksa kart tıklamasını tamamen iptal et
     if (document.body.classList.contains('modal-open')) return;
     
     const project = projects[Number(card.dataset.projectId)];
@@ -234,7 +237,7 @@ window.setTimeout(() => document.body.classList.add('loaded'), 1800);
 
 
 // ==========================================
-// MODAL GÖSTERİMİ VE GALERİ İŞLEMLERİ
+// MODAL GÖSTERİMİ VE DINAMIK GALERİ VERİLERİ
 // ==========================================
 function showProjectModal(project) {
   const modal = document.querySelector('[data-modal]');
@@ -258,7 +261,7 @@ function showProjectModal(project) {
   if (area) area.textContent = project.area;
   if (description) description.textContent = project.description;
 
-  // Galeriyi temizle ve yeniden oluştur
+  // Galeriyi oluştur
   if (galleryContainer) {
     if (project.gallery && project.gallery.length > 0) {
       galleryContainer.innerHTML = project.gallery
@@ -272,10 +275,11 @@ function showProjectModal(project) {
     }
   }
 
-  // Modalı göster
+  // Modalı göster ve body'yi kilitle
   modal.setAttribute('aria-hidden', 'false');
   document.body.classList.add('modal-open');
 }
+
 
 // =======================================================
 // GÜVENLİ VE İZOLE GALERİ TIKLAMA KONTROLLERİ
@@ -287,13 +291,13 @@ document.addEventListener('click', (event) => {
   if (!galleryImg) return; 
 
   event.preventDefault();
-  event.stopPropagation(); // Tıklamanın kartlara sızmasını önler
+  event.stopPropagation(); // Tıklamanın dışarı taşmasını önler
 
   const mainImage = document.querySelector('[data-modal-image]');
   if (mainImage) {
     mainImage.setAttribute('src', galleryImg.getAttribute('src'));
     
-    // Aktiflik efektini güncelle
+    // Aktiflik efektlerini güncelle
     document.querySelectorAll('[data-modal-gallery] img').forEach(img => {
       img.style.opacity = '0.5';
       img.style.border = 'none';
@@ -309,7 +313,7 @@ document.addEventListener('click', (event) => {
   if (!mainImage) return; 
 
   event.preventDefault();
-  event.stopPropagation(); // Tıklamanın kartlara sızmasını önler
+  event.stopPropagation(); // Döngü koruması
 
   const currentSrc = mainImage.getAttribute('src');
   const galleryImages = Array.from(document.querySelectorAll('[data-modal-gallery] img'));
@@ -326,7 +330,7 @@ document.addEventListener('click', (event) => {
   
   mainImage.setAttribute('src', nextSrc);
   
-  // Alttaki küçük resimleri senkronize et
+  // Küçük resimleri senkronize et
   galleryImages.forEach((img, idx) => {
     if (idx === nextIndex) {
       img.style.opacity = '1';
@@ -337,4 +341,17 @@ document.addEventListener('click', (event) => {
     }
   });
 });
- 
+
+// =======================================================
+// MODALIN KAPANMASINI SAĞLAYAN TAM KORUMA KODU
+// =======================================================
+document.querySelectorAll('[data-modal-close]').forEach((closer) => {
+  closer.addEventListener('click', () => {
+    const modal = document.querySelector('[data-modal]');
+    if (modal) {
+      modal.setAttribute('aria-hidden', 'true');
+      // Sitenin kilitlenmesini önleyen altın vuruş burası:
+      document.body.classList.remove('modal-open'); 
+    }
+  });
+});
